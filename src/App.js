@@ -3,16 +3,17 @@ import Clock from 'react-clock';
 import 'react-clock/dist/Clock.css';
 import './App.css';
 
-
 function App() {
   const [value, setValue] = useState(new Date());
   const [serverValue, setServerValue] = useState(new Date());
+  const [postgresValue, setPostgresValue] = useState(new Date());
 
   useEffect(() => {
+
     const interval = setInterval(() => setValue(new Date()), 1000);
     const serverInterval = setInterval(() => 
       // Note the below has CORS allow set to global (demo ONLY!) via Istio config
-      fetch(process.env["REST_API_URL"] || "https://time.shared.12factor.xyz/time",{
+      fetch(process.env.REACT_APP_REST_API_URL || "https://time.shared.12factor.xyz/time",{
         method: "GET",
         headers: {
           'pragma': 'no-cache',
@@ -27,10 +28,28 @@ function App() {
         console.log(e);
       }), 5000
     );
+    const postgresInterval = setInterval(() =>
+      // Note the below has CORS allow set to global (demo ONLY!) via Istio config
+      fetch(process.env.REACT_APP_DB_TIME_URL || "https://time.shared.12factor.xyz/dbtime", {
+          method: "GET",
+          headers: {
+            'pragma': 'no-cache',
+            'cache-control': 'no-cache'
+          }
+      })
+      .then(response => response.json())
+      .then(result => {
+          setPostgresValue(new Date(result.dbtime * 1000));
+      })
+      .catch(e => {
+          console.log(e);
+      }), 5000
+    );
 
     return () => {
       clearInterval(interval);
       clearInterval(serverInterval);
+      clearInterval(postgresInterval);
     };
   }, []);
 
@@ -41,11 +60,15 @@ function App() {
           <div><center><Clock value={value} /></center></div>
         </div>
         <div>
-          <p>Current server time:</p>
-          <div><center><Clock value={serverValue} /></center></div>
+            <p>Current server time:</p>
+            <div><center><Clock value={serverValue} /></center></div>
         </div>
         <div>
-          See 
+            <p>Current database time:</p>
+            <div><center><Clock value={postgresValue} /></center></div>
+        </div>
+        <div>
+          See
           <a
             className="App-link"
             href = "https://www.youtube.com/c/adamfowleruk"
