@@ -71,6 +71,22 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
 
+### Buildpacks to build the OCI image
+
+Use following commands to build the image.
+    
+    pack build demo-reactjs-time-ui --builder paketobuildpacks/builder:base
+
+_NOTE: Assuming [buildpacks](https://buildpacks.io/) is installed locally_
+
+### Running the built container image
+
+    docker run -d -e REACT_APP_REST_API_URL=http://localhost:5000/time -e REACT_APP_DB_TIME_URL=http://localhost:5000/dbtime -p3000:3000 demo-reactjs-time-ui:latest
+    
+_NOTE: Assuming [docker](https://www.docker.com/) is installed locally and accompanying [flask-rest-api]
+(https://github.com/adamfowleruk/demo-flask-app) is running locally on port 5000_
+
 ## License
 
 This repo is licensed under Apache-2.0. Some yarn modules will be under different licenses. Review their licenses for details.
+
